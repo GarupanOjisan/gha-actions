@@ -1,0 +1,28 @@
+name: 'Get K8s Container Info'
+description: 'Get K8s Container Info'
+inputs:
+  manifest-path:
+    description: 'Path to the manifest file'
+    required: true
+outputs:
+  container-info:
+    description: 'Container Info'
+    value: ${{ steps.get_k8s_container_info.outputs.container-info }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+      with:
+          go-version: '1.20'
+    - name: build script
+      shell: bash
+      run: |
+        cd .github/workflows/_composite_k8s_container_info
+        go mod download
+        go build -o get_k8s_container_info
+    - name: Get K8s Container Info
+      shell: bash
+      run: |
+        cd .github/workflows/_composite_k8s_container_info
+        echo "container-info=$(./get_k8s_container_info --file=${{ inputs.manifest-path }}) >> $GITHUB_OUTPUT
